@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="author" content="Louis Tham" />
+
+
+<title>Effects of Environmental Events on the US population and economy</title>
+
+<script src="Reproduceable_Research_Assignment_2_files/jquery-1.11.0/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="Reproduceable_Research_Assignment_2_files/bootstrap-3.3.1/css/bootstrap.min.css" rel="stylesheet" />
+<script src="Reproduceable_Research_Assignment_2_files/bootstrap-3.3.1/js/bootstrap.min.js"></script>
+<script src="Reproduceable_Research_Assignment_2_files/bootstrap-3.3.1/shim/html5shiv.min.js"></script>
+<script src="Reproduceable_Research_Assignment_2_files/bootstrap-3.3.1/shim/respond.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<link rel="stylesheet"
+      href="Reproduceable_Research_Assignment_2_files/highlight/default.css"
+      type="text/css" />
+<script src="Reproduceable_Research_Assignment_2_files/highlight/highlight.js"></script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img { 
+  max-width:100%; 
+  height: auto; 
+}
+</style>
+<div class="container-fluid main-container">
+
+
+<div id="header">
+<h1 class="title">Effects of Environmental Events on the US population and economy</h1>
+<h4 class="author"><em>Louis Tham</em></h4>
+<h4 class="date"><em>Tuesday, June 16, 2015</em></h4>
+</div>
+
+
+<div id="reproduceable-research-assignment-2" class="section level4">
+<h4>“Reproduceable Research Assignment 2”</h4>
+</div>
+<div id="background" class="section level3">
+<h3>Background</h3>
+<p>Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern.</p>
+<p>This project involves exploring the U.S. National Oceanic and Atmospheric Administration’s (NOAA) storm database. This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.</p>
+</div>
+<div id="objective-of-this-report" class="section level3">
+<h3>Objective of this Report</h3>
+<p>The objective of this report is to answer the questions below:</p>
+<ol style="list-style-type: decimal">
+<li><p>Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?</p></li>
+<li><p>Across the United States, which types of events have the greatest economic consequences?</p></li>
+</ol>
+</div>
+<div id="the-data" class="section level3">
+<h3>The Data</h3>
+<p>The data for this assignment come in the form of a comma-separated-value file compressed via the bzip2 algorithm to reduce its size. You can download the file from the course web site: <a href="https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2">Storm Data [47Mb]</a></p>
+<p>There is also some documentation of the database available. Here you will find how some of the variables are constructed/defined.</p>
+<p><a href="https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf">National Weather Service Storm Data Documentation</a></p>
+<p><a href="https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2FNCDC%20Storm%20Events-FAQ%20Page.pdf">National Climatic Data Center Storm Events FAQ</a></p>
+<p>The events in the database start in the year 1950 and end in November 2011. In the earlier years of the database there are generally fewer events recorded, most likely due to a lack of good records. More recent years should be considered more complete.</p>
+</div>
+<div id="preparation-of-the-data-for-analysis" class="section level3">
+<h3>1) Preparation of the Data for Analysis</h3>
+<div id="a.-prepare-the-environment" class="section level4">
+<h4>a. Prepare the environment</h4>
+<p>Clear the environment and bring in all relevant libraries</p>
+<pre class="r"><code>## Remove everything within the environment
+rm(list = ls())
+
+library(plyr)</code></pre>
+<pre><code>## Warning: package &#39;plyr&#39; was built under R version 3.1.3</code></pre>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 3.1.3</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;
+## 
+## The following objects are masked from &#39;package:plyr&#39;:
+## 
+##     arrange, count, desc, failwith, id, mutate, rename, summarise,
+##     summarize
+## 
+## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag
+## 
+## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(ggplot2)</code></pre>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 3.1.3</code></pre>
+<pre class="r"><code>#library(lubridate)
+library(tidyr)</code></pre>
+<pre><code>## Warning: package &#39;tidyr&#39; was built under R version 3.1.3</code></pre>
+</div>
+<div id="b.-extraction-of-data" class="section level4">
+<h4>b. Extraction of Data</h4>
+<ol style="list-style-type: decimal">
+<li>Prepare the folder, if not available, create the folder</li>
+<li>Check for the relevant file, if not available, download the file</li>
+<li>Read in the file into the environment</li>
+</ol>
+<pre class="r"><code>## Cheeck if the folder &quot;Explore_data&quot; exist in the working directory, if not available, create it
+if (!file.exists(&quot;Reproduce_Data&quot;)) {
+        dir.create(&quot;Reproduce_Data&quot;)
+}
+
+## Cheeck if the file  &quot;repdata-data-StormData.csv.bz2&quot; exist in the defined folder, if not available, download it
+if (!file.exists(&quot;Reproduce_Data/repdata-data-StormData.csv.bz2&quot;)) {
+        fileUrl &lt;- &quot;https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2&quot;
+        download.file(fileUrl, destfile = &quot;./Reproduce_Data/repdata-data-StormData.csv.bz2&quot;)
+}
+
+## Read files
+data &lt;- read.csv(&quot;./Reproduce_Data/repdata-data-StormData.csv.bz2&quot;)</code></pre>
+</div>
+<div id="c.-basic-transformation-of-the-data" class="section level4">
+<h4>c. Basic Transformation of the data</h4>
+<ol style="list-style-type: decimal">
+<li>To remove typical variation in the primary key - Set the data in the primary key to upper case - Remove any unnecessary double or triple spaces - Remove any punctuation</li>
+<li>Group the data based on the primary key (EVTYPE) - Only relevant fields such as fatalities, injuries and property damages are extracted - All irrelvant data are discarded</li>
+<li>Remove data that are not significant to this study - This study is to identify 2 key points: - Events that are most harmful to population health (ie deaths/fatalities) - Events that has the highest economic impact (ie property damages) - Events that results in no fatalities, injuries or property damage are removed</li>
+</ol>
+<pre class="r"><code># Group data by event and summarize for variables of interest
+
+data$EVTYPE = toupper(data$EVTYPE)
+data$EVTYPE = gsub(&quot;  &quot;, &quot; &quot;,data$EVTYPE)
+data$EVTYPE = gsub(&quot;[[:punct:]]&quot;, &quot; &quot;, data$EVTYPE)
+
+trim &lt;- function (x) gsub(&quot;^\\s+|\\s+$&quot;, &quot;&quot;, x)
+
+data$EVTYPE = trim(data$EVTYPE)
+
+data = group_by(data, EVTYPE)
+data_event = summarise(data, 
+                       FATALITIES = sum(FATALITIES), 
+                       INJURIES = sum(INJURIES), 
+                       DAMAGES = sum(PROPDMG))
+
+## Remove old dataset to free up memory
+rm(data)
+
+## Remove irrelevant data
+data_event$cumm = data_event$FATALITIES + data_event$INJURIES + data_event$DAMAGES
+data_event_tidy = filter(data_event, cumm != 0)
+data_event_tidy = data_event_tidy[,1:4]
+
+## Remove old dataset to free up memory
+rm(data_event)</code></pre>
+</div>
+<div id="d.-reclassification-of-the-data-cleaning-the-data" class="section level4">
+<h4>d. Reclassification of the data (Cleaning the data)</h4>
+<ol style="list-style-type: decimal">
+<li>Define the key events as identified by the National Weather Service, documented in the Storm Data Preparation - Link to the document: <a href="https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf">https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf</a></li>
+<li>Create a list of key words that represents the identified key events - Any events not defined will be classified as “OTHERS”</li>
+<li>Not all events occurs singularly, there are events that can occur concurrently, hence affecting the result - This is with the assumption that the data is properly documented based on the Storm Data Preparation document - As the study is to identify specific events that causes most harm/damages, mix events should be omitted</li>
+<li>Events are reclassified based on the list of key words - Singular events will remain the name of the key event - Mix events will have a “MIX EVENT:” place at the front followed by the key event names</li>
+</ol>
+<pre class="r"><code>data_event_tidy$KEY = &quot;OTHERS&quot;
+
+# Event reclassification list
+events=list()
+events[&quot;ASTRONOMICAL LOW TIDE&quot;] = list(c(&quot;ASTRONOMICAL LOW&quot;))
+events[&quot;AVALANCHE&quot;]=list(c(&quot;AVALA&quot;))
+events[&quot;BLIZZARD&quot;]=list(c(&quot;BLIZZ&quot;))
+events[&quot;COASTAL FLOOD&quot;]=list(c(&quot;COASTAL SURGE&quot;, &quot;EROSION CSTL FLOOD&quot;, &quot;COASTAL F&quot;))
+events[&quot;COLD/WIND CHILL&quot;]=list(c(&quot;COLD&quot;, &quot;LIGHT SNOW&quot;))
+events[&quot;DEBRIS FLOW&quot;]=list(c(&quot;LANDS&quot;))
+events[&quot;DENSE FOG&quot;]=list(c(&quot;DENSE FOG&quot;))
+events[&quot;DENSE SMOKE&quot;]=list(c(&quot;DENSE SMOKE&quot;))
+events[&quot;DROUGHT&quot;]=list(c(&quot;DROUGHT&quot;))
+events[&quot;DUST DEVIL&quot;]=list(c(&quot;DEVIL&quot;))
+events[&quot;DUST STORM&quot;]=list(c(&quot;DUST STORM&quot;, &quot;DUST S&quot;))
+events[&quot;EXCESSIVE HEAT&quot;]=list(c(&quot;IVE HEAT&quot;, &quot;EXCESSIVE HEAT&quot;))
+events[&quot;EXTREME COLD/WIND CHILL&quot;]=list(c(&quot;EME COLD&quot;, &quot;HYPO&quot;, &quot;LOW TEM&quot;))
+events[&quot;FLASH FLOOD&quot;]=list(c(&quot;FLASH&quot;))
+events[&quot;FLOOD&quot;]=list(c(&quot;^FLO&quot;, &quot;HIGH WA&quot;, &quot;FLOODING&quot;, &quot;R FLOOD&quot;, &quot;N FLOOD&quot;, &quot;RISING WATER&quot;, &quot;STREAM FLOOD&quot;,
+                       &quot;STREAM FLD&quot;, &quot;FLOOD&quot;))
+events[&quot;FROST/FREEZE&quot;]=list(c(&quot;FROST&quot;,&quot;FREEZE$&quot;, &quot;GLAZE&quot;))
+events[&quot;FUNNEL CLOUD&quot;]=list(c(&quot;FUNNEL CLOUD&quot;))
+events[&quot;FREEZING FOG&quot;]=list(c(&quot;FREEZING FOG&quot;))
+events[&quot;HAIL&quot;]=list(c(&quot;HAIL&quot;))
+events[&quot;HEAT&quot;]=list(c(&quot;HEAT&quot;, &quot;Y WARM&quot;, &quot;HYPER&quot;))
+events[&quot;HEAVY RAIN&quot;]=list(c(&quot;SIVE RAIN&quot;, &quot;HEAVY RAIN&quot;, &quot;TORRENTIAL RAIN&quot;, &quot;HEAVY PRECIP&quot;))
+events[&quot;HEAVY SNOW&quot;]=list(c(&quot;HEAVY SNOW&quot;, &quot;SIVE SNOW&quot;, &quot;ING SNOW&quot;, &quot;RECORD SNOW&quot;, &quot;SNOW SQUALL&quot;))
+events[&quot;HIGH SURF&quot;]=list(c(&quot;HIGH SURF&quot;, &quot;HIGH SW&quot;, &quot;HIGH WA&quot;, &quot;HIGH SU&quot;, &quot;HEAVY SU&quot;, &quot;ROUGH SEAS&quot;, &quot;HAZARDOUS SURF&quot;, &quot;HIGH SE&quot;))
+events[&quot;HIGH WIND&quot;]=list(c(&quot;HIGH WIND&quot;, &quot;DRY MICRO&quot;, &quot;E WIND&quot;, &quot;Y WIND&quot;))
+events[&quot;HURRICANE/TYPHOON&quot;]=list(c(&quot;HURRICANE&quot;,&quot;TYPHOON&quot;))
+events[&quot;ICE STORM&quot;]=list(c(&quot;ICE STORM&quot;))
+events[&quot;LAKE-EFFECT SNOW&quot;]=list(c(&quot;LAKE-EFFECT&quot;, &quot;LAKE SNOW&quot;, &quot;LAKE EFFECT SNOW&quot;))
+events[&quot;LAKESHORE FLOOD&quot;]=list(c(&quot;LAKESHORE FLOOD&quot;, &quot;LAKE FLOOD&quot;))
+events[&quot;LIGHTNING&quot;]=list(c(&quot;LIGHTNING&quot;, &quot;LIGHTING&quot;, &quot;LIGTNTING&quot;))
+events[&quot;MARINE HAIL&quot;]=list(c(&quot;MARINE HAIL&quot;))
+events[&quot;MARINE HIGH WIND&quot;]=list(c(&quot;MARINE HIGH WIND&quot;))
+events[&quot;MARINE STRONG WIND&quot;]=list(c(&quot;MARINE STRONG WIND&quot;))
+events[&quot;MARINE THUNDERSTORM WIND&quot;]=list(c(&quot;MARINE THUNDERSTORM WIND&quot;, &quot;MARINE THUNDERSTORM&quot;, &quot;MARINE TSTM WIND&quot;))
+events[&quot;RIP CURRENT&quot;]=list(c(&quot;RIP CURRENT&quot;))
+events[&quot;SEICHE&quot;]=list(c(&quot;SEICHE&quot;))
+events[&quot;SLEET&quot;]=list(c(&quot;SLEET&quot;, &quot;MIX&quot;, &quot;SPRAY&quot;, &quot;ZING RAIN&quot;, &quot;ZING DRIZZLE&quot;, &quot;RAIN/SNOW&quot;)) # Mixed Precipitation
+events[&quot;STORM SURGE/TIDE&quot;]=list(c(&quot;STORM SURGE&quot;, &quot;STORM TIDE&quot;, &quot;COASTAL STORM&quot;, &quot;COASTALSTORM&quot;))
+events[&quot;STRONG WIND&quot;]=list(c(&quot;STRONG WIND&quot;, &quot;G WIND&quot;, &quot;WIND DAMAGE&quot;))
+events[&quot;THUNDERSTORM WIND&quot;]=list(c(&quot;THUNDERSTORM&quot;,&quot;THUDERSTORM&quot;, &quot;TSTM WIND&quot;, &quot;T[A-Z]M WIND&quot;, &quot;TSTMW&quot;))
+events[&quot;TORNADO&quot;]=list(c(&quot;TORNADO&quot;))
+events[&quot;TROPICAL DEPRESSION&quot;]=list(c(&quot;TROPICAL DEPRESSION&quot;))
+events[&quot;TROPICAL STORM&quot;]=list(c(&quot;TROPICAL STORM&quot;))
+events[&quot;TSUNAMI&quot;]=list(c(&quot;TSUNAMI&quot;))
+events[&quot;VOLCANIC ASH&quot;]=list(c(&quot;VOLCANANIC ASH&quot;))
+events[&quot;WATERSPROUT&quot;]=list(c(&quot;WATERSPOUT&quot;))
+events[&quot;WILDFIRE&quot;]=list(c(&quot;WILDFIRE&quot;, &quot;WILD F&quot;, &quot;WILD/FOREST F&quot;))
+events[&quot;WINTER STORM&quot;]=list(c(&quot;WINTER STORM&quot;))
+events[&quot;WINTER WEATHER&quot;]=list(c(&quot;WINTER WEATHER&quot;))
+
+
+for (i in 1:length(events)){
+        flag = 0
+        for (j in 1:length(events[[i]])){ 
+                data_event_tidy = mutate( data_event_tidy, 
+                                          KEY = ifelse( 
+                                                  grepl(events[[i]][j], EVTYPE) == TRUE, 
+                                                  ifelse(
+                                                          KEY == &quot;OTHERS&quot;, 
+                                                          names(events[i]),
+                                                          ifelse(
+                                                                  grepl(&quot;^MIX EVENTS: &quot;, KEY) == TRUE,
+                                                                  ifelse(grepl(names(events[i]), KEY) == TRUE,
+                                                                         KEY, paste(KEY, &quot;;&quot;, names(events[i]))),
+                                                                  ifelse(grepl(names(events[i]), KEY) == TRUE,
+                                                                         KEY, paste(&quot;MIX EVENTS: &quot;, KEY, &quot;;&quot;, 
+                                                                                    names(events[i]))))),
+                                            KEY))
+        }
+}</code></pre>
+</div>
+<div id="e.-summarizing-the-data-based-on-the-key-events" class="section level4">
+<h4>e. Summarizing the data based on the Key Events</h4>
+<ol style="list-style-type: decimal">
+<li>Data are summarized based on the reclassified key events</li>
+</ol>
+<pre class="r"><code>data_event_tidy = group_by(data_event_tidy, KEY)
+event_summary = summarise(data_event_tidy, 
+                       FATALITIES = sum(FATALITIES), 
+                       INJURIES = sum(INJURIES), 
+                       DAMAGES = sum(DAMAGES))
+
+## Remove old dataset to free up memory
+rm(data_event_tidy, events)</code></pre>
+</div>
+<div id="f.-to-check-that-the-bulk-of-the-contribution-still-lies-in-the-key-events" class="section level4">
+<h4>f. To check that the bulk of the contribution still lies in the key events</h4>
+<ol style="list-style-type: decimal">
+<li>The summarized data is further classified to “KEY EVENTS”, “NON-KEY EVENTS” and “MIX EVENTS” - This is to ensure that the key events are still the main contributor to the fatalities and damages</li>
+<li>Based on the table, - Mix Event contributes about a. c(event_test[2,5],“%”) to the total fatalities b. c(event_test[2,6], “%”) to the total damages - Non Key Events contributes about a. c(event_test[3,5],“%”) to the total fatalities b. c(event_test[3,6], “%”) to the total damages</li>
+<li>From the above, it is safe to conclude that Key events are still the main contributor and we can omit non-key events and mix events</li>
+</ol>
+<pre class="r"><code>event_summary$identify = ifelse(grepl(&quot;MIX&quot;, event_summary$KEY) == TRUE, &quot;MIX EVENTS&quot;, 
+                                ifelse(grepl(&quot;OTHERS&quot;, event_summary$KEY) == TRUE, &quot;NON-KEY EVENTS&quot;, &quot;KEY EVENTS&quot;))
+event_test = group_by(event_summary, identify)
+event_test = summarise(event_test, 
+                       FATALITIES = sum(FATALITIES), 
+                       INJURIES = sum(INJURIES), 
+                       DAMAGES = sum(DAMAGES))
+
+event_summary = as.data.frame(event_summary[,1:4])   
+
+event_test$PERCENT_FATALITIES = round(prop.table(event_test$FATALITIES)*100,2)
+event_test$PERCENT_DAMAGES = round(prop.table(event_test$DAMAGES)*100,2)
+
+event_test</code></pre>
+<pre><code>## Source: local data frame [3 x 6]
+## 
+##         identify FATALITIES INJURIES     DAMAGES PERCENT_FATALITIES
+## 1     KEY EVENTS      14637   138861 10823520.24              96.65
+## 2     MIX EVENTS        370      596    31917.60               2.44
+## 3 NON-KEY EVENTS        138     1071    29062.17               0.91
+## Variables not shown: PERCENT_DAMAGES (dbl)</code></pre>
+</div>
+<div id="g.-to-finalize-the-data-for-analysis" class="section level4">
+<h4>g. To finalize the data for analysis</h4>
+<ol style="list-style-type: decimal">
+<li>Omit data from mix events and non-key events</li>
+<li>Summarize data for fatalities and damages</li>
+</ol>
+<pre class="r"><code>## Remove old dataset to free up memory
+rm(event_test)
+
+## Highlighting on Single Events 
+event_summary$FLAG = ifelse(grepl(&quot;MIX&quot;, event_summary$KEY) == TRUE | grepl(&quot;OTHERS&quot;,event_summary$KEY) == TRUE, &quot;1&quot;, &quot;0&quot;)
+
+## Remove Mix Events
+event_summary = filter(event_summary, FLAG == 0)
+event_summary = as.data.frame(event_summary[,1:4])        
+
+fatalities_summary = as.data.frame(event_summary[,c(1,2)])
+fatalities_summary = arrange(fatalities_summary, desc(FATALITIES))
+
+damages_summary = as.data.frame(event_summary[,c(1,4)])
+damages_summary = arrange(damages_summary, desc(DAMAGES))</code></pre>
+</div>
+</div>
+<div id="analyzing-the-data" class="section level3">
+<h3>2) Analyzing the Data</h3>
+<div id="a-creating-the-fields-for-pareto-plot" class="section level4">
+<h4>a) Creating the fields for Pareto Plot</h4>
+<pre class="r"><code>fatalities_summary$CUMM = cumsum(fatalities_summary$FATALITIES)
+fatalities_summary$PERCENT_FATALITIES = round(prop.table(fatalities_summary$FATALITIES)*100,2)
+fatalities_summary$CUMM_PERCENT_FATAL = cumsum(fatalities_summary$PERCENT_FATALITIES)
+fatalities_summary$KEY &lt;- factor(fatalities_summary$KEY, levels=fatalities_summary$KEY)
+
+damages_summary$CUMM = cumsum(damages_summary$DAMAGES)
+damages_summary$PERCENT_DAMAGES = round(prop.table(damages_summary$DAMAGES)*100,2)
+damages_summary$CUMM_PERCENT_DMG = cumsum(damages_summary$PERCENT_DAMAGES)
+damages_summary$KEY &lt;- factor(damages_summary$KEY, levels=damages_summary$KEY)</code></pre>
+</div>
+<div id="b-plot-out-the-fatalities-pareto-chart" class="section level4">
+<h4>b) Plot out the Fatalities Pareto Chart</h4>
+<ol style="list-style-type: decimal">
+<li>Based on the pareto, there are top 6 events that contributes to ~80% of the total fatalities</li>
+<li>Details of these 6 events are identified in the table below.</li>
+</ol>
+<pre class="r"><code>## Plot out Pareto for Fatalities
+
+g1 = ggplot(fatalities_summary, aes(x = KEY)) 
+g2 = geom_bar(aes(y = FATALITIES), fill=&quot;red&quot;, stat=&quot;identity&quot;) 
+g3 = geom_point(aes(y = CUMM)) 
+g4 = geom_path(aes(y = CUMM, group=1))
+g5 = theme(axis.text.x = element_text(angle = 90, hjust = 1))
+g6 = labs(x = &quot;EVENTS&quot;)
+g7 = ggtitle(&#39;Pareto Plot on Fatalities of Key Events&#39;)
+
+g1 + g2 + g3 + g4 + g5 + g6 + g7</code></pre>
+<p><img src="figure/Fatalities_Pareto-1.png" /></p>
+<pre class="r"><code>top_fatalities = filter(fatalities_summary, CUMM_PERCENT_FATAL &lt;= 80)
+
+top_fatalities</code></pre>
+<pre><code>##                 KEY FATALITIES  CUMM PERCENT_FATALITIES CUMM_PERCENT_FATAL
+## 1           TORNADO       5633  5633              38.48              38.48
+## 2    EXCESSIVE HEAT       1920  7553              13.12              51.60
+## 3              HEAT       1253  8806               8.56              60.16
+## 4       FLASH FLOOD       1035  9841               7.07              67.23
+## 5         LIGHTNING        817 10658               5.58              72.81
+## 6 THUNDERSTORM WIND        705 11363               4.82              77.63</code></pre>
+</div>
+<div id="c-plot-out-the-damages-pareto-chart" class="section level4">
+<h4>c) Plot out the Damages Pareto Chart</h4>
+<ol style="list-style-type: decimal">
+<li>Based on the pareto, there are top 4 events that contributes to ~80% of the total damages</li>
+<li>Details of these 4 events are identified in the table below.</li>
+</ol>
+<pre class="r"><code>## Plot out Pareto for Fatalities
+
+g1 = ggplot(damages_summary, aes(x = KEY)) 
+g2 = geom_bar(aes(y = DAMAGES), fill=&quot;red&quot;, stat=&quot;identity&quot;) 
+g3 = geom_point(aes(y = CUMM)) 
+g4 = geom_path(aes(y = CUMM, group=1))
+g5 = theme(axis.text.x = element_text(angle = 90, hjust = 1))
+g6 = labs(x = &quot;EVENTS&quot;)
+g7 = ggtitle(&#39;Pareto Plot on Damages of Key Events&#39;)
+
+g1 + g2 + g3 + g4 + g5 + g6 + g7</code></pre>
+<p><img src="figure/Damages_Pareto-1.png" /></p>
+<pre class="r"><code>top_damages = filter(damages_summary, CUMM_PERCENT_DMG &lt;= 80)
+
+top_damages</code></pre>
+<pre><code>##                 KEY   DAMAGES    CUMM PERCENT_DAMAGES CUMM_PERCENT_DMG
+## 1           TORNADO 3214531.9 3214532           29.70            29.70
+## 2 THUNDERSTORM WIND 2664632.5 5879164           24.62            54.32
+## 3       FLASH FLOOD 1473810.9 7352975           13.62            67.94
+## 4             FLOOD  968112.4 8321088            8.94            76.88</code></pre>
+</div>
+</div>
+<div id="end-of-report." class="section level3">
+<h3>End of Report.</h3>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
